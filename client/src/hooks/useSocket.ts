@@ -1,0 +1,64 @@
+import { useEffect, useState } from "react";
+import { Socket } from "socket.io-client";
+import socketService from "../services/socketService";
+import type { SessionData, Participant } from "../types";
+
+interface SocketEvents {
+    "session-joined": (data: SessionData) => void;
+    "vote-submitted": (data: { featureId: string; participantId: string; value: string }) => void;
+    "feature-started": (data: SessionData) => void;
+    "results-revealed": (data: SessionData) => void;
+    "participant-joined": (participant: Participant) => void;
+    "participant-left": (participantId: string) => void;
+    "host-disconnected": () => void;
+}
+
+/**
+ * Custom hook for managing Socket.IO connection and events
+ */
+export function useSocket() {
+    const [socket, setSocket] = useState<Socket | null>(null);
+    const [isConnected, setIsConnected] = useState(false);
+
+    useEffect(() => {
+        const newSocket = socketService.connect();
+        setSocket(newSocket);
+
+        const handleConnect = () => setIsConnected(true);
+        const handleDisconnect = () => setIsConnected(false);
+
+        newSocket.on("connect", handleConnect);
+        newSocket.on("disconnect", handleDisconnect);
+
+        return () => {
+            newSocket.off("connect", handleConnect);
+            newSocket.off("disconnect", handleDisconnect);
+            socketService.disconnect();
+        };
+    }, []);
+
+    const on = <E extends keyof SocketEvents>(
+        event: E,
+        handler: SocketEvents[E]
+    ) => {
+        socket?.on(event, handler as any);
+    };
+
+    const off = <E extends keyof SocketEvents>(
+        event: E,
+        handler: SocketEvents[E]
+    ) => {
+        socket?.off(event, handler as any);
+    };
+
+    return {
+        socket,
+        isConnected,
+        on,
+        off,
+        joinSession: socketService.joinSession.bind(socketService),
+        submitVote: socketService.submitVote.bind(socketService),
+        startFeature: socketService.startFeature.bind(socketService),
+        revealResults: socketService.revealResults.bind(socketService),
+    };
+}

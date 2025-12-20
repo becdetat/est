@@ -1,5 +1,6 @@
-import { BrowserRouter as Router } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { CssBaseline, ThemeProvider, createTheme } from "@mui/material";
+import { Home, Session } from "./components/pages";
 
 const theme = createTheme({
     palette: {
@@ -18,10 +19,10 @@ function App() {
         <ThemeProvider theme={theme}>
             <CssBaseline />
             <Router>
-                <div>
-                    <h1>Est - Planning Poker</h1>
-                    <p>Application setup complete</p>
-                </div>
+                <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/session/:sessionId" element={<Session />} />
+                </Routes>
             </Router>
         </ThemeProvider>
     );
