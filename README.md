@@ -102,11 +102,34 @@ The client will be available at http://localhost:3000 and the server at http://l
 
 ### Testing
 
+**Unit/Integration Tests:**
 ```bash
 npm test              # Run tests in all workspaces
 npm run test --workspace=server    # Server tests only
 npm run test --workspace=client    # Client tests only
 ```
+
+**End-to-End Tests (Playwright):**
+```bash
+# First time setup
+npm run playwright:install
+
+# Run all E2E tests
+npm run test:e2e
+
+# Run with UI mode (interactive)
+npm run test:e2e:ui
+
+# Run in headed mode (see browser)
+npm run test:e2e:headed
+
+# Debug tests
+npm run test:e2e:debug
+```
+
+**Manual Testing:**
+See [TESTING.md](TESTING.md) for comprehensive manual testing checklist.
+
 
 ### Linting and Formatting
 
