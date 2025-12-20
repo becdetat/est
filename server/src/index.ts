@@ -3,6 +3,8 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { createServer } from "http";
 import { Server } from "socket.io";
+import { initializeScheduledJobs } from "./utils/scheduler";
+import prisma from "./config/database";
 
 dotenv.config();
 
@@ -33,6 +35,22 @@ io.on("connection", (socket) => {
     socket.on("disconnect", () => {
         console.log(`Client disconnected: ${socket.id}`);
     });
+});
+
+// Initialize scheduled cleanup jobs
+initializeScheduledJobs();
+
+// Graceful shutdown
+process.on("SIGINT", async () => {
+    console.log("\nShutting down gracefully...");
+    await prisma.$disconnect();
+    process.exit(0);
+});
+
+process.on("SIGTERM", async () => {
+    console.log("\nShutting down gracefully...");
+    await prisma.$disconnect();
+    process.exit(0);
 });
 
 // Start server
