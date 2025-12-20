@@ -1,0 +1,52 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "sqlite"
+    url      = env("DATABASE_URL")
+}
+
+model Session {
+    id             String        @id
+    estimationType String        // "FIBONACCI" or "TSHIRT"
+    createdAt      DateTime      @default(now())
+    updatedAt      DateTime      @updatedAt
+    participants   Participant[]
+    features       Feature[]
+}
+
+model Participant {
+    id        String   @id
+    sessionId String
+    name      String
+    email     String?
+    isHost    Boolean  @default(false)
+    createdAt DateTime @default(now())
+    session   Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+    votes     Vote[]
+}
+
+model Feature {
+    id         String   @id
+    sessionId  String
+    name       String?
+    link       String?
+    isRevealed Boolean  @default(false)
+    createdAt  DateTime @default(now())
+    session    Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+    votes      Vote[]
+}
+
+model Vote {
+    id            String      @id
+    featureId     String
+    participantId String
+    value         String
+    createdAt     DateTime    @default(now())
+    updatedAt     DateTime    @updatedAt
+    feature       Feature     @relation(fields: [featureId], references: [id], onDelete: Cascade)
+    participant   Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
+
+    @@unique([featureId, participantId])
+}

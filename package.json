@@ -1,0 +1,30 @@
+{
+    "name": "est",
+    "version": "1.0.0",
+    "private": true,
+    "description": "Est - Self-hostable planning poker application",
+    "workspaces": [
+        "client",
+        "server"
+    ],
+    "scripts": {
+        "dev": "npm run dev --workspace=server & npm run dev --workspace=client",
+        "dev:server": "npm run dev --workspace=server",
+        "dev:client": "npm run dev --workspace=client",
+        "build": "npm run build --workspace=client && npm run build --workspace=server",
+        "test": "npm run test --workspace=server && npm run test --workspace=client",
+        "lint": "npm run lint --workspace=server && npm run lint --workspace=client",
+        "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\""
+    },
+    "devDependencies": {
+        "@typescript-eslint/eslint-plugin": "^7.0.0",
+        "@typescript-eslint/parser": "^7.0.0",
+        "eslint": "^8.56.0",
+        "prettier": "^3.2.0",
+        "typescript": "^5.3.3"
+    },
+    "engines": {
+        "node": ">=18.0.0",
+        "npm": ">=9.0.0"
+    }
+}
