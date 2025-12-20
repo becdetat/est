@@ -56,15 +56,15 @@ export function Home() {
             setLoading(true);
             setError(null);
 
-            // Update participant info
-            updateParticipant(name.trim(), email.trim() || undefined);
-
             // Create session
             const response = await createSession(
                 name.trim(),
                 estimationType,
                 email.trim() || undefined
             );
+
+            // Update participant with the host participant ID from server
+            updateParticipant(name.trim(), email.trim() || undefined, response.hostParticipantId);
 
             // Navigate to session
             navigate(`/session/${response.sessionId}`);

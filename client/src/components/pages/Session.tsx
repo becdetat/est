@@ -51,7 +51,10 @@ export function Session() {
     const [selectedVote, setSelectedVote] = useState<string | undefined>(undefined);
     const [hostDisconnected, setHostDisconnected] = useState(false);
 
-    const currentFeature = features.find((f) => !f.isRevealed);
+    // Get the most recent feature (unrevealed if available, otherwise most recent revealed)
+    const currentFeature = features.length > 0 
+        ? (features.find((f) => !f.isRevealed) || features[features.length - 1])
+        : undefined;
     const isHost = participant && participants.some(
         (p) => p.id === participant.id && p.isHost
     );
@@ -86,23 +89,36 @@ export function Session() {
         const handleVoteSubmitted = (data: {
             featureId: string;
             participantId: string;
-            value: string;
+            hasVoted: boolean;
         }) => {
             console.log("[Session] Vote submitted:", data);
-            // Vote updates will be reflected in feature data
-        };
-
-        const handleFeatureStarted = (data: SessionData) => {
-            console.log("[Session] Feature started:", data);
-            if (data.currentFeature) {
-                addFeature(data.currentFeature);
+            // Mark that this participant has voted by adding a placeholder vote
+            const feature = features.find(f => f.id === data.featureId);
+            if (feature) {
+                const updatedFeature = {
+                    ...feature,
+                    votes: [
+                        ...(feature.votes || []).filter(v => v.participantId !== data.participantId),
+                        { id: '', featureId: data.featureId, participantId: data.participantId, value: '?', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+                    ]
+                };
+                updateFeature(updatedFeature);
             }
         };
 
-        const handleResultsRevealed = (data: SessionData) => {
+        const handleFeatureStarted = (data: { feature: any }) => {
+            console.log("[Session] Feature started:", data);
+            if (data.feature) {
+                addFeature(data.feature);
+                setSelectedVote(undefined);
+            }
+        };
+
+        const handleResultsRevealed = (data: { feature: any; hasConsensus: boolean }) => {
             console.log("[Session] Results revealed:", data);
-            if (data.currentFeature) {
-                updateFeature(data.currentFeature);
+            if (data.feature) {
+                updateFeature(data.feature);
+                setSelectedVote(undefined);
             }
         };
 
@@ -297,6 +313,29 @@ export function Session() {
                                     disabled={currentFeature.isRevealed}
                                     onSelectCard={handleVote}
                                 />
+
+                                {currentFeature.isRevealed && currentFeature.votes && currentFeature.votes.length > 0 && (
+                                    <Paper sx={{ p: 3, mt: 3 }}>
+                                        <Typography variant="h6" gutterBottom>
+                                            Results
+                                        </Typography>
+                                        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+                                            {currentFeature.votes.map((vote) => {
+                                                const voter = participants.find(p => p.id === vote.participantId);
+                                                return (
+                                                    <Box key={vote.id} sx={{ textAlign: "center" }}>
+                                                        <Typography variant="h4" color="primary">
+                                                            {vote.value}
+                                                        </Typography>
+                                                        <Typography variant="caption">
+                                                            {voter?.name || "Unknown"}
+                                                        </Typography>
+                                                    </Box>
+                                                );
+                                            })}
+                                        </Box>
+                                    </Paper>
+                                )}
 
                                 {isHost && (
                                     <Box sx={{ mt: 3, display: "flex", gap: 2 }}>

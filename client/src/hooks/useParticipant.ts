@@ -21,10 +21,10 @@ export function useParticipant() {
         return null;
     });
 
-    const updateParticipant = (name: string, email?: string) => {
-        const id = participant?.id || generateParticipantId();
-        saveUserDetails(name, email, id);
-        setParticipant({ id, name, email });
+    const updateParticipant = (name: string, email?: string, id?: string) => {
+        const participantId = id || participant?.id || generateParticipantId();
+        saveUserDetails(name, email, participantId);
+        setParticipant({ id: participantId, name, email });
     };
 
     return {
