@@ -5,6 +5,9 @@ import { createServer } from "http";
 import { Server } from "socket.io";
 import { initializeScheduledJobs } from "./utils/scheduler";
 import prisma from "./config/database";
+import apiRoutes from "./routes/api";
+import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
+import SocketHandler from "./socket/handlers";
 
 dotenv.config();
 
@@ -24,18 +27,22 @@ app.use(cors());
 app.use(express.json());
 
 // Health check endpoint
-app.get("/health", (req, res) => {
+app.get("/health", (_req, res) => {
     res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
-// Socket.IO connection handling
-io.on("connection", (socket) => {
-    console.log(`Client connected: ${socket.id}`);
+// API routes
+app.use("/api", apiRoutes);
 
-    socket.on("disconnect", () => {
-        console.log(`Client disconnected: ${socket.id}`);
-    });
-});
+// 404 handler
+app.use(notFoundHandler);
+
+// Error handler
+app.use(errorHandler);
+
+// Initialize Socket.IO handlers
+const socketHandler = new SocketHandler(io);
+socketHandler.initializeHandlers();
 
 // Initialize scheduled cleanup jobs
 initializeScheduledJobs();
