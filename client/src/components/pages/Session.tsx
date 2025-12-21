@@ -105,15 +105,19 @@ export function Session() {
             }
         };
 
-        const handleFeatureStarted = (data: SessionData) => {
+        const handleFeatureStarted = (data: { feature: any }) => {
             console.log("[Session] Feature started:", data);
-            // Feature will be updated via session data
+            if (data.feature) {
+                addFeature(data.feature);
+            }
             setSelectedVote(undefined);
         };
 
-        const handleResultsRevealed = (data: SessionData) => {
+        const handleResultsRevealed = (data: { feature: any; hasConsensus: boolean }) => {
             console.log("[Session] Results revealed:", data);
-            // Results will be updated via session data
+            if (data.feature) {
+                updateFeature(data.feature);
+            }
             setSelectedVote(undefined);
         };
 

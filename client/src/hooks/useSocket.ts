@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { Socket } from "socket.io-client";
 import socketService from "../services/socketService";
-import type { SessionData, Participant } from "../types";
+import type { SessionData, Participant, Feature } from "../types";
 
 interface SocketEvents {
     "session-joined": (data: SessionData) => void;
     "vote-submitted": (data: { featureId: string; participantId: string; value: string }) => void;
-    "feature-started": (data: SessionData) => void;
-    "results-revealed": (data: SessionData) => void;
+    "feature-started": (data: { feature: Feature }) => void;
+    "results-revealed": (data: { feature: Feature; hasConsensus: boolean }) => void;
     "participant-joined": (participant: Participant) => void;
     "participant-left": (participantId: string) => void;
     "host-disconnected": () => void;
