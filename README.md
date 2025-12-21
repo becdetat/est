@@ -2,6 +2,20 @@
 
 Est is an open source, self-hostable planning poker application for agile estimation sessions.
 
+## ⚡ Quick Start
+
+```bash
+# Docker (recommended)
+docker-compose up -d
+# Access at http://localhost:3001
+
+# Or development mode
+npm install && npm run dev
+# Client: http://localhost:3000
+```
+
+📖 **[Full Quick Start Guide →](QUICKSTART.md)**
+
 ## Features
 
 - 🎯 Multiple estimation types (Fibonacci, T-Shirt sizing)
@@ -10,14 +24,28 @@ Est is an open source, self-hostable planning poker application for agile estima
 - 📊 Session history and results tracking
 - 🎨 Modern UI with Material-UI
 - 🐳 Docker support for easy self-hosting
+- 🔒 Participant persistence across refreshes
+- 👑 Host-only controls
+- 🎭 Anonymous voting until reveal
+- 🎉 Consensus detection
+- 🧹 Automatic session cleanup (28 days)
+
+## Documentation
+
+- 📘 [Quick Start Guide](QUICKSTART.md) - Get running in 5 minutes
+- 🚀 [Deployment Guide](DEPLOYMENT.md) - Production deployment instructions
+- 🧪 [Testing Guide](TESTING.md) - Comprehensive testing documentation
+- 🤝 [Contributing Guide](CONTRIBUTING.md) - How to contribute
+- 📝 [Changelog](CHANGELOG.md) - Version history
 
 ## Tech Stack
 
-- **Frontend**: React, TypeScript, Vite, Material-UI
-- **Backend**: Node.js, Express.js, TypeScript
-- **Database**: SQLite with Prisma ORM
-- **Real-time**: Socket.IO
-- **Testing**: Vitest
+- **Frontend**: React 18, TypeScript, Vite 7, Material-UI 6
+- **Backend**: Node.js 18+, Express 4, TypeScript
+- **Database**: SQLite with Prisma ORM 5
+- **Real-time**: Socket.IO 4
+- **Testing**: Vitest, Playwright
+- **Deployment**: Docker, Docker Compose
 
 ## Project Structure
 
@@ -144,9 +172,48 @@ npm run format        # Format code with Prettier
 npm run build         # Build both client and server
 ```
 
+The build creates:
+- `client/dist/` - Static files for the frontend
+- `server/dist/` - Compiled server code
+
 ## Docker Deployment
 
-Coming soon - Docker configuration for easy self-hosting.
+### Quick Start
+
+```bash
+# Using Docker Compose (recommended)
+docker-compose up -d
+
+# Access at http://localhost:3001
+```
+
+### Manual Docker Build
+
+```bash
+# Build image
+docker build -t est:latest .
+
+# Run container
+docker run -d -p 3001:3001 -v est-data:/app/data --name est est:latest
+```
+
+### Environment Configuration
+
+Create a `.env` file or pass environment variables:
+
+```env
+CORS_ORIGIN=https://your-domain.com
+PORT=3001
+NODE_ENV=production
+```
+
+### Database Backup
+
+```bash
+docker cp est-app:/app/data/prod.db ./backup.db
+```
+
+**For detailed deployment instructions**, see [DEPLOYMENT.md](DEPLOYMENT.md)
 
 ## API Documentation
 
@@ -182,15 +249,41 @@ Coming soon - Docker configuration for easy self-hosting.
 
 The application uses SQLite with Prisma ORM. See [spec.md](spec.md) for detailed schema documentation.
 
+Key tables:
+- **Session** - Estimation sessions with unique IDs
+- **Participant** - Users in sessions with UUID persistence
+- **Feature** - Items to be estimated
+- **Vote** - Individual votes with values
+
+
 ## Contributing
 
-Contributions are welcome! Please read CONTRIBUTING.md for details.
+Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for:
+- Development setup
+- Code style guidelines
+- Testing requirements
+- Pull request process
+
+Est is built with significant assistance from AI. We welcome AI generated pull requests, however we ask that you review the PR first for code quality and maintainability.
 
 ## License
 
-See LICENSE file for details.
+See [LICENSE](LICENSE) file for details.
 
 ## Support
 
-For issues and questions, please open a GitHub issue.
-Open source self-hostable planning poker
+- 🐛 **Bug reports**: [GitHub Issues](https://github.com/becdetat/est/issues)
+- 💡 **Feature requests**: [GitHub Issues](https://github.com/becdetat/est/issues/new)
+- 💬 **Discussions**: [GitHub Discussions](https://github.com/becdetat/est/discussions)
+
+## Acknowledgments
+
+Built using open source technologies:
+- React, Express, Prisma, Socket.IO, Material-UI
+- Thanks to all contributors and the open source community
+
+---
+
+**Est** - Open source self-hostable planning poker for agile teams
+
+[⭐ Star on GitHub](https://github.com/your-repo/est) | [📖 Documentation](QUICKSTART.md) | [🚀 Deploy](DEPLOYMENT.md)

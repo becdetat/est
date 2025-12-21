@@ -19,7 +19,12 @@
         "test:e2e:debug": "playwright test --debug",
         "playwright:install": "playwright install",
         "lint": "npm run lint --workspace=server && npm run lint --workspace=client",
-        "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\""
+        "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+        "start": "npm run start --workspace=server",
+        "docker:build": "docker build -t est:latest .",
+        "docker:run": "docker run -d -p 3001:3001 -v est-data:/app/data --name est est:latest",
+        "docker:stop": "docker stop est && docker rm est",
+        "docker:logs": "docker logs -f est"
     },
     "devDependencies": {
         "@playwright/test": "^1.57.0",
