@@ -72,13 +72,8 @@ export function ParticipantCard({
                     />
                     <Box sx={{ flex: 1, textAlign: "left" }}>
                         <Typography variant="body2" fontWeight="bold" noWrap>
-                            {participant.name}
+                            {participant.name} {participant.isHost && "(Host)"}
                         </Typography>
-                        {participant.isHost && (
-                            <Typography variant="caption" color="primary">
-                                Host
-                            </Typography>
-                        )}
                     </Box>
                 </Box>
 
