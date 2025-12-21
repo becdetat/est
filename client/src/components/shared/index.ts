@@ -2,6 +2,8 @@ export { UserAvatar } from "./UserAvatar";
 export { VotingCard } from "./VotingCard";
 export { VotingCardGrid } from "./VotingCardGrid";
 export { ParticipantList } from "./ParticipantList";
+export { ParticipantCard } from "./ParticipantCard";
+export { ParticipantCardGrid } from "./ParticipantCardGrid";
 export { FeatureFormDialog } from "./FeatureFormDialog";
 export { ConfirmDialog } from "./ConfirmDialog";
 export { FeatureHistorySidebar } from "./FeatureHistorySidebar";

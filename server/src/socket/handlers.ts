@@ -15,10 +15,12 @@ interface SocketData {
 export class SocketHandler {
     private io: Server;
     private participantSockets: Map<string, string>; // participantId -> socketId
+    private disconnectTimers: Map<string, NodeJS.Timeout>; // participantId -> timeout
 
     constructor(io: Server) {
         this.io = io;
         this.participantSockets = new Map();
+        this.disconnectTimers = new Map();
     }
 
     /**
@@ -108,6 +110,13 @@ export class SocketHandler {
 
             // Track participant socket
             this.participantSockets.set(participantId, socket.id);
+
+            // Cancel any pending disconnect timer for this participant (reconnection)
+            if (this.disconnectTimers.has(participantId)) {
+                clearTimeout(this.disconnectTimers.get(participantId));
+                this.disconnectTimers.delete(participantId);
+                console.log(`[Socket] Participant ${participantId} reconnected to session ${sessionId}`);
+            }
 
             // Get participant info
             const participant = await participantService.getParticipant(participantId);
@@ -243,28 +252,38 @@ export class SocketHandler {
         const { sessionId, participantId } = socketData;
 
         if (sessionId && participantId) {
-            // Check if participant is the host
-            sessionService.isHost(sessionId, participantId).then((isHost) => {
+            console.log(`[Socket] Client ${socket.id} disconnected (participant ${participantId}, session ${sessionId})`);
+            
+            // Wait 3 seconds before treating this as a real disconnect
+            // This allows for reconnection scenarios (page refresh, network hiccups)
+            const timer = setTimeout(async () => {
+                // Check if participant is the host
+                const isHost = await sessionService.isHost(sessionId, participantId);
+                
                 if (isHost) {
                     // Host disconnected - notify all participants
                     this.io.to(sessionId).emit("host-disconnected", {});
-                    console.log(`[Socket] Host ${participantId} disconnected from session ${sessionId}`);
+                    console.log(`[Socket] Host ${participantId} disconnected from session ${sessionId} (grace period expired)`);
                 } else {
                     // Regular participant left
                     this.io.to(sessionId).emit("participant-left", {
                         participantId,
                     });
                     console.log(
-                        `[Socket] Participant ${participantId} disconnected from session ${sessionId}`
+                        `[Socket] Participant ${participantId} disconnected from session ${sessionId} (grace period expired)`
                     );
                 }
-            });
 
-            // Remove from tracking
-            this.participantSockets.delete(participantId);
+                // Remove from tracking
+                this.participantSockets.delete(participantId);
+                this.disconnectTimers.delete(participantId);
+            }, 3000); // 3 second grace period
+
+            // Store the timer so we can cancel it if they reconnect
+            this.disconnectTimers.set(participantId, timer);
+        } else {
+            console.log(`[Socket] Client disconnected: ${socket.id} (no session data)`);
         }
-
-        console.log(`[Socket] Client disconnected: ${socket.id}`);
     }
 }
 

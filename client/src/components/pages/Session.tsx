@@ -25,6 +25,7 @@ import { joinSession } from "../../services/apiService";
 import {
     VotingCardGrid,
     ParticipantList,
+    ParticipantCardGrid,
     FeatureFormDialog,
     FeatureHistorySidebar,
     ConfirmDialog,
@@ -89,7 +90,7 @@ export function Session() {
         const handleVoteSubmitted = (data: {
             featureId: string;
             participantId: string;
-            hasVoted: boolean;
+            value: string;
         }) => {
             console.log("[Session] Vote submitted:", data);
             // Mark that this participant has voted by adding a placeholder vote
@@ -99,27 +100,23 @@ export function Session() {
                     ...feature,
                     votes: [
                         ...(feature.votes || []).filter(v => v.participantId !== data.participantId),
-                        { id: '', featureId: data.featureId, participantId: data.participantId, value: '?', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
+                        { id: '', featureId: data.featureId, participantId: data.participantId, value: data.value || '?', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
                     ]
                 };
                 updateFeature(updatedFeature);
             }
         };
 
-        const handleFeatureStarted = (data: { feature: any }) => {
+        const handleFeatureStarted = (data: SessionData) => {
             console.log("[Session] Feature started:", data);
-            if (data.feature) {
-                addFeature(data.feature);
-                setSelectedVote(undefined);
-            }
+            // Feature will be updated via session data
+            setSelectedVote(undefined);
         };
 
-        const handleResultsRevealed = (data: { feature: any; hasConsensus: boolean }) => {
+        const handleResultsRevealed = (data: SessionData) => {
             console.log("[Session] Results revealed:", data);
-            if (data.feature) {
-                updateFeature(data.feature);
-                setSelectedVote(undefined);
-            }
+            // Results will be updated via session data
+            setSelectedVote(undefined);
         };
 
         const handleParticipantJoined = (newParticipant: Participant) => {
@@ -304,6 +301,20 @@ export function Session() {
 
                         {currentFeature && session && (
                             <>
+                                {/* Participant Cards Grid */}
+                                <ParticipantCardGrid
+                                    participants={participants}
+                                    currentParticipantId={participant?.id}
+                                    votes={
+                                        currentFeature.votes
+                                            ? Object.fromEntries(
+                                                currentFeature.votes.map((v) => [v.participantId, v.value])
+                                            )
+                                            : {}
+                                    }
+                                    isRevealed={currentFeature.isRevealed}
+                                />
+
                                 <Typography variant="h6" gutterBottom>
                                     Select Your Estimate
                                 </Typography>
