@@ -28,7 +28,6 @@ import {
     ParticipantCardGrid,
     FeatureFormDialog,
     FeatureHistorySidebar,
-    ConfirmDialog,
 } from "../shared";
 import type { SessionData, Participant } from "../../types";
 
@@ -50,7 +49,6 @@ export function Session() {
     const [featureDialogOpen, setFeatureDialogOpen] = useState(false);
     const [historyOpen, setHistoryOpen] = useState(false);
     const [selectedVote, setSelectedVote] = useState<string | undefined>(undefined);
-    const [hostDisconnected, setHostDisconnected] = useState(false);
 
     // Get the most recent feature (unrevealed if available, otherwise most recent revealed)
     const currentFeature = features.length > 0 
@@ -129,18 +127,12 @@ export function Session() {
             removeParticipantFromState(participantId);
         };
 
-        const handleHostDisconnected = () => {
-            console.log("[Session] Host disconnected");
-            setHostDisconnected(true);
-        };
-
         on("session-joined", handleSessionJoined);
         on("vote-submitted", handleVoteSubmitted);
         on("feature-started", handleFeatureStarted);
         on("results-revealed", handleResultsRevealed);
         on("participant-joined", handleParticipantJoined);
         on("participant-left", handleParticipantLeft);
-        on("host-disconnected", handleHostDisconnected);
 
         return () => {
             off("session-joined", handleSessionJoined);
@@ -149,7 +141,6 @@ export function Session() {
             off("results-revealed", handleResultsRevealed);
             off("participant-joined", handleParticipantJoined);
             off("participant-left", handleParticipantLeft);
-            off("host-disconnected", handleHostDisconnected);
         };
     }, [isConnected, on, off, addFeature, updateFeature, addParticipantToState, removeParticipantFromState]);
 
@@ -438,16 +429,6 @@ export function Session() {
                 onClose={() => setHistoryOpen(false)}
                 features={features}
                 currentFeatureId={currentFeature?.id}
-            />
-
-            <ConfirmDialog
-                open={hostDisconnected}
-                title="Host Disconnected"
-                message="The session host has disconnected. You may continue viewing but cannot start new features."
-                confirmLabel="OK"
-                cancelLabel=""
-                onConfirm={() => setHostDisconnected(false)}
-                onCancel={() => setHostDisconnected(false)}
             />
         </>
     );
