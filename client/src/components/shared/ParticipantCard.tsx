@@ -57,8 +57,8 @@ export function ParticipantCard({
                 width: "100%",
                 maxWidth: 200,
                 minWidth: 150,
-                border: isCurrentUser ? "3px solid" : "1px solid",
-                borderColor: isCurrentUser ? "primary.main" : "divider",
+                border: "1px solid",
+                borderColor: "divider",
                 transition: "all 0.3s",
             }}
         >
@@ -71,8 +71,12 @@ export function ParticipantCard({
                         size={32}
                     />
                     <Box sx={{ flex: 1, textAlign: "left" }}>
-                        <Typography variant="body2" fontWeight="bold" noWrap>
-                            {participant.name} {participant.isHost && "(Host)"}
+                        <Typography 
+                            variant="body2" 
+                            fontWeight={isCurrentUser ? "bold" : "normal"} 
+                            noWrap
+                        >
+                            {participant.name} {isCurrentUser && "(You)"}
                         </Typography>
                     </Box>
                 </Box>

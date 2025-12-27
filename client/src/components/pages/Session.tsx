@@ -111,7 +111,11 @@ export function Session() {
             featureId: string;
             participantId: string;
         }) => {
-            console.log("[Session] Vote unsubmitted:", data);
+            // If this is the current participant's vote being removed, clear selectedVote
+            if (participant && data.participantId === participant.id) {
+                setSelectedVote(undefined);
+            }
+            
             // Use callback form to get current features
             setFeatures((currentFeatures) => {
                 const feature = currentFeatures.find(f => f.id === data.featureId);
@@ -417,13 +421,6 @@ export function Session() {
                         <ParticipantList
                             participants={participants}
                             currentParticipantId={participant?.id}
-                            votes={
-                                currentFeature && currentFeature.votes
-                                    ? Object.fromEntries(
-                                        currentFeature.votes.map((v) => [v.participantId, v.value])
-                                    )
-                                    : {}
-                            }
                         />
                         {isHost && (
                             <Button

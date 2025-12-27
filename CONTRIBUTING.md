@@ -31,10 +31,32 @@ Thank you for your interest in contributing to Est! This document provides guide
 
 2. Make your changes
 3. Write/update tests
-4. Ensure all tests pass: `npm test`
+4. **ALWAYS run tests after every change**: `npm test --workspaces -- --run`
 5. Lint your code: `npm run lint`
 6. Format your code: `npm run format`
 7. Commit with clear messages
+
+### AI Assistance Guidelines
+
+When working with AI assistants (like GitHub Copilot):
+
+**CRITICAL: Test-Driven Development**
+- **ALWAYS run the full test suite after making ANY code change**
+- Command: `npm test --workspaces -- --run`
+- Never skip this step, even for "small" changes
+- AI should verify tests pass before considering a change complete
+
+**Test Coverage Requirements**
+- Write tests for all new features before implementation
+- Update existing tests when modifying functionality
+- Maintain or improve test coverage percentage
+- All 109 tests (50 client + 59 server) must pass
+
+**Code Quality Standards**
+- Run TypeScript build to catch type errors: `npm run build --workspaces`
+- Follow existing code patterns and conventions
+- Update documentation when changing functionality
+- Add comments for complex logic
 
 ### Commit Messages
 
