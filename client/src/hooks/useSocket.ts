@@ -22,6 +22,7 @@ export function useSocket() {
     const [socket, setSocket] = useState<Socket | null>(null);
     const [isConnected, setIsConnected] = useState(false);
 
+    /* eslint-disable react-hooks/set-state-in-effect */
     useEffect(() => {
         const newSocket = socketService.connect();
         setSocket(newSocket);
@@ -38,11 +39,13 @@ export function useSocket() {
             socketService.disconnect();
         };
     }, []);
+    /* eslint-enable react-hooks/set-state-in-effect */
 
     const on = <E extends keyof SocketEvents>(
         event: E,
         handler: SocketEvents[E]
     ) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         socket?.on(event, handler as any);
     };
 
@@ -50,6 +53,7 @@ export function useSocket() {
         event: E,
         handler: SocketEvents[E]
     ) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         socket?.off(event, handler as any);
     };
 

@@ -28,6 +28,7 @@ export function ParticipantCard({
     const hasConsensus = consensusValue && voteValue === consensusValue;
 
     // Handle flip animation when results are revealed
+    /* eslint-disable react-hooks/set-state-in-effect */
     useEffect(() => {
         if (isRevealed && hasVoted) {
             // Start flip animation
@@ -50,6 +51,7 @@ export function ParticipantCard({
             setShouldShake(false);
         }
     }, [isRevealed, hasVoted, hasConsensus]);
+    /* eslint-enable react-hooks/set-state-in-effect */
 
     return (
         <Card
@@ -76,7 +78,9 @@ export function ParticipantCard({
                             fontWeight={isCurrentUser ? "bold" : "normal"} 
                             noWrap
                         >
-                            {participant.name} {isCurrentUser && "(You)"}
+                            {participant.name} 
+                            {participant.isHost && " (Host)"}
+                            {isCurrentUser && " (You)"}
                         </Typography>
                     </Box>
                 </Box>

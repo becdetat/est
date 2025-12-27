@@ -3,6 +3,7 @@ import { Request, Response, NextFunction } from "express";
 /**
  * Error handling middleware
  */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function errorHandler(err: Error, _req: Request, res: Response, _next: NextFunction): any {
     console.error("[ErrorHandler]", err);
 

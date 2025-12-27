@@ -29,7 +29,7 @@ import {
     FeatureFormDialog,
     FeatureHistorySidebar,
 } from "../shared";
-import type { SessionData, Participant } from "../../types";
+import type { SessionData, Participant, Feature } from "../../types";
 
 /**
  * Session page for voting on features
@@ -129,7 +129,7 @@ export function Session() {
             });
         };
 
-        const handleFeatureStarted = (data: { feature: any }) => {
+        const handleFeatureStarted = (data: { feature: Feature }) => {
             console.log("[Session] Feature started:", data);
             if (data.feature) {
                 setFeatures((prev) => [...prev, data.feature]);
@@ -137,7 +137,7 @@ export function Session() {
             setSelectedVote(undefined);
         };
 
-        const handleResultsRevealed = (data: { feature: any; hasConsensus: boolean }) => {
+        const handleResultsRevealed = (data: { feature: Feature; hasConsensus: boolean }) => {
             console.log("[Session] Results revealed:", data);
             if (data.feature) {
                 setFeatures((prev) => prev.map((f) => (f.id === data.feature.id ? data.feature : f)));
@@ -181,7 +181,7 @@ export function Session() {
             off("participant-left", handleParticipantLeft);
             off("session-closed", handleSessionClosed);
         };
-    }, [isConnected, on, off, setFeatures, addParticipantToState, removeParticipantFromState, navigate]);
+    }, [isConnected, on, off, setFeatures, addParticipantToState, removeParticipantFromState, navigate, participant]);
 
     const handleJoin = async () => {
         if (!sessionId || !participant) return;
