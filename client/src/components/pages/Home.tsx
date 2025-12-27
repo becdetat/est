@@ -97,10 +97,10 @@ export function Home() {
                     }}
                 >
                     <Typography variant="h2" component="h1" gutterBottom>
-                        Est
+                        Est.
                     </Typography>
                     <Typography variant="h5" color="text.secondary" gutterBottom>
-                        Planning Poker for Teams
+                        Planning Poker for teams
                     </Typography>
                     <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
                         Create a session and invite your team to estimate features

@@ -122,6 +122,23 @@ export class SessionService {
             throw error;
         }
     }
+
+    /**
+     * Delete a session (close it)
+     */
+    async deleteSession(sessionId: string) {
+        try {
+            await prisma.session.delete({
+                where: { id: sessionId },
+            });
+
+            console.log(`[SessionService] Deleted session ${sessionId}`);
+            return true;
+        } catch (error) {
+            console.error("[SessionService] Error deleting session:", error);
+            throw error;
+        }
+    }
 }
 
 export default new SessionService();

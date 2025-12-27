@@ -38,8 +38,8 @@ export function Session() {
     const { sessionId } = useParams<{ sessionId: string }>();
     const navigate = useNavigate();
     const { participant, updateParticipant } = useParticipant();
-    const { isConnected, on, off, joinSession: socketJoinSession, submitVote, startFeature: socketStartFeature, revealResults: socketRevealResults } = useSocket();
-    const { session, features, participants, loading: sessionLoading, error: sessionError, updateFeature, addFeature, addParticipant: addParticipantToState, removeParticipant: removeParticipantFromState } = useSession(sessionId);
+    const { isConnected, on, off, joinSession: socketJoinSession, submitVote, unsubmitVote, startFeature: socketStartFeature, revealResults: socketRevealResults, closeSession: socketCloseSession } = useSocket();
+    const { session, features, participants, loading: sessionLoading, error: sessionError, addParticipant: addParticipantToState, removeParticipant: removeParticipantFromState, setFeatures } = useSession(sessionId);
 
     const [joined, setJoined] = useState(false);
     const [joinDialogOpen, setJoinDialogOpen] = useState(false);
@@ -91,9 +91,11 @@ export function Session() {
             value: string;
         }) => {
             console.log("[Session] Vote submitted:", data);
-            // Mark that this participant has voted by adding a placeholder vote
-            const feature = features.find(f => f.id === data.featureId);
-            if (feature) {
+            // Use callback form to get current features
+            setFeatures((currentFeatures) => {
+                const feature = currentFeatures.find(f => f.id === data.featureId);
+                if (!feature) return currentFeatures;
+                
                 const updatedFeature = {
                     ...feature,
                     votes: [
@@ -101,14 +103,32 @@ export function Session() {
                         { id: '', featureId: data.featureId, participantId: data.participantId, value: data.value || '?', createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() }
                     ]
                 };
-                updateFeature(updatedFeature);
-            }
+                return currentFeatures.map(f => f.id === updatedFeature.id ? updatedFeature : f);
+            });
+        };
+
+        const handleVoteUnsubmitted = (data: {
+            featureId: string;
+            participantId: string;
+        }) => {
+            console.log("[Session] Vote unsubmitted:", data);
+            // Use callback form to get current features
+            setFeatures((currentFeatures) => {
+                const feature = currentFeatures.find(f => f.id === data.featureId);
+                if (!feature) return currentFeatures;
+                
+                const updatedFeature = {
+                    ...feature,
+                    votes: (feature.votes || []).filter(v => v.participantId !== data.participantId)
+                };
+                return currentFeatures.map(f => f.id === updatedFeature.id ? updatedFeature : f);
+            });
         };
 
         const handleFeatureStarted = (data: { feature: any }) => {
             console.log("[Session] Feature started:", data);
             if (data.feature) {
-                addFeature(data.feature);
+                setFeatures((prev) => [...prev, data.feature]);
             }
             setSelectedVote(undefined);
         };
@@ -116,7 +136,7 @@ export function Session() {
         const handleResultsRevealed = (data: { feature: any; hasConsensus: boolean }) => {
             console.log("[Session] Results revealed:", data);
             if (data.feature) {
-                updateFeature(data.feature);
+                setFeatures((prev) => prev.map((f) => (f.id === data.feature.id ? data.feature : f)));
             }
             setSelectedVote(undefined);
         };
@@ -131,22 +151,33 @@ export function Session() {
             removeParticipantFromState(participantId);
         };
 
+        const handleSessionClosed = (data: { sessionId: string }) => {
+            console.log("[Session] Session closed event received:", data);
+            console.log("[Session] Redirecting to home page...");
+            // Redirect to home page
+            navigate("/");
+        };
+
         on("session-joined", handleSessionJoined);
         on("vote-submitted", handleVoteSubmitted);
+        on("vote-unsubmitted", handleVoteUnsubmitted);
         on("feature-started", handleFeatureStarted);
         on("results-revealed", handleResultsRevealed);
         on("participant-joined", handleParticipantJoined);
         on("participant-left", handleParticipantLeft);
+        on("session-closed", handleSessionClosed);
 
         return () => {
             off("session-joined", handleSessionJoined);
             off("vote-submitted", handleVoteSubmitted);
+            off("vote-unsubmitted", handleVoteUnsubmitted);
             off("feature-started", handleFeatureStarted);
             off("results-revealed", handleResultsRevealed);
             off("participant-joined", handleParticipantJoined);
             off("participant-left", handleParticipantLeft);
+            off("session-closed", handleSessionClosed);
         };
-    }, [isConnected, on, off, addFeature, updateFeature, addParticipantToState, removeParticipantFromState]);
+    }, [isConnected, on, off, setFeatures, addParticipantToState, removeParticipantFromState, navigate]);
 
     const handleJoin = async () => {
         if (!sessionId || !participant) return;
@@ -178,8 +209,15 @@ export function Session() {
 
     const handleVote = (value: string) => {
         if (!sessionId || !currentFeature || !participant) return;
-        setSelectedVote(value);
-        submitVote(sessionId, currentFeature.id, participant.id, value);
+        
+        // If clicking the same card, deselect it
+        if (selectedVote === value) {
+            setSelectedVote(undefined);
+            unsubmitVote(sessionId, currentFeature.id, participant.id);
+        } else {
+            setSelectedVote(value);
+            submitVote(sessionId, currentFeature.id, participant.id, value);
+        }
     };
 
     const handleShare = async () => {
@@ -201,6 +239,16 @@ export function Session() {
     const handleRevealResults = () => {
         if (!currentFeature || !sessionId || !participant) return;
         socketRevealResults(sessionId, currentFeature.id, participant.id);
+    };
+
+    const handleCloseSession = () => {
+        if (!sessionId || !participant) return;
+        if (confirm("Are you sure you want to close this session? All participants will be disconnected.")) {
+            console.log("[Session] Host closing session:", sessionId);
+            socketCloseSession(sessionId, participant.id);
+            // Redirect host immediately after closing
+            setTimeout(() => navigate("/"), 100);
+        }
     };
 
     if (sessionLoading) {
@@ -238,7 +286,7 @@ export function Session() {
             <AppBar position="static">
                 <Toolbar>
                     <Typography variant="h6" sx={{ flexGrow: 1 }}>
-                        Est - {session?.estimationType === "FIBONACCI" ? "Fibonacci" : "T-Shirt"}
+                        Est.
                     </Typography>
                     <IconButton color="inherit" onClick={handleShare}>
                         <ShareIcon />
@@ -377,6 +425,17 @@ export function Session() {
                                     : {}
                             }
                         />
+                        {isHost && (
+                            <Button
+                                variant="outlined"
+                                color="error"
+                                fullWidth
+                                onClick={handleCloseSession}
+                                sx={{ mt: 2 }}
+                            >
+                                Close Session
+                            </Button>
+                        )}
                     </Box>
                 </Box>
             </Container>

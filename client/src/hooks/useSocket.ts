@@ -6,11 +6,13 @@ import type { SessionData, Participant, Feature } from "../types";
 interface SocketEvents {
     "session-joined": (data: SessionData) => void;
     "vote-submitted": (data: { featureId: string; participantId: string; value: string }) => void;
+    "vote-unsubmitted": (data: { featureId: string; participantId: string }) => void;
     "feature-started": (data: { feature: Feature }) => void;
     "results-revealed": (data: { feature: Feature; hasConsensus: boolean }) => void;
     "participant-joined": (participant: Participant) => void;
     "participant-left": (participantId: string) => void;
     "host-disconnected": () => void;
+    "session-closed": (data: { sessionId: string }) => void;
 }
 
 /**
@@ -58,7 +60,9 @@ export function useSocket() {
         off,
         joinSession: socketService.joinSession.bind(socketService),
         submitVote: socketService.submitVote.bind(socketService),
+        unsubmitVote: socketService.unsubmitVote.bind(socketService),
         startFeature: socketService.startFeature.bind(socketService),
         revealResults: socketService.revealResults.bind(socketService),
+        closeSession: socketService.closeSession.bind(socketService),
     };
 }
