@@ -91,6 +91,7 @@ export class ParticipantService {
             console.log(`[ParticipantService] Removed participant ${participantId}`);
             return true;
         } catch (error) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             if ((error as any).code === "P2025") {
                 // Record not found
                 return false;

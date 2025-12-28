@@ -73,6 +73,7 @@ export class CleanupService {
             console.log(`[CleanupService] Deleted session: ${sessionId}`);
             return true;
         } catch (error) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             if ((error as any).code === "P2025") {
                 // Record not found
                 return false;

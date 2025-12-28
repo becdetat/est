@@ -9,15 +9,11 @@ export default defineConfig({
         environment: "jsdom",
         setupFiles: "./src/tests/setup.ts",
         deps: {
-            optimizer: {
-                web: {
-                    include: [
-                        "@exodus/bytes", 
-                        "html-encoding-sniffer", 
-                        "tough-cookie"
-                    ]
-                }
-            }
+            inline: [
+                "@exodus/bytes",
+                "html-encoding-sniffer",
+                "tough-cookie",
+            ],
         },
     },
     resolve: {

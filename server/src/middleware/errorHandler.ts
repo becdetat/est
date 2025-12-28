@@ -4,11 +4,13 @@ import { Request, Response, NextFunction } from "express";
  * Error handling middleware
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function errorHandler(err: Error, _req: Request, res: Response, _next: NextFunction): any {
+export function errorHandler(err: Error, _req: Request, res: Response, _next: NextFunction) {
     console.error("[ErrorHandler]", err);
 
     // Prisma errors
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     if ((err as any).code) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const prismaError = err as any;
         switch (prismaError.code) {
             case "P2002":
@@ -21,7 +23,7 @@ export function errorHandler(err: Error, _req: Request, res: Response, _next: Ne
     }
 
     // Default error
-    res.status(500).json({ error: "Internal server error" });
+    return res.status(500).json({ error: "Internal server error" });
 }
 
 /**
