@@ -32,9 +32,8 @@ Thank you for your interest in contributing to Est! This document provides guide
 2. Make your changes
 3. Write/update tests
 4. **ALWAYS run tests after every change**: `npm test --workspaces -- --run`
-5. Lint your code: `npm run lint`
-6. Format your code: `npm run format`
-7. Commit with clear messages
+5. Format your code: `npm run format`
+6. Commit with clear messages
 
 ### AI Assistance Guidelines
 
