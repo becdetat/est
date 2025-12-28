@@ -8,6 +8,9 @@ export default defineConfig({
         environment: "jsdom",
         setupFiles: "./src/tests/setup.ts",
     },
+    resolve: {
+        conditions: ["node", "import", "module", "browser", "default"],
+    },
     server: {
         deps: {
             inline: ["@exodus/bytes", "html-encoding-sniffer"],
