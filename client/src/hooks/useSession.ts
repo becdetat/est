@@ -75,5 +75,6 @@ export function useSession(sessionId: string | undefined) {
         addParticipant,
         removeParticipant,
         refresh: loadSession,
+        setFeatures,
     };
 }

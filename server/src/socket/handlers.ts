@@ -48,6 +48,18 @@ export class SocketHandler {
                 }
             );
 
+            // Unsubmit vote event
+            socket.on(
+                "unsubmit-vote",
+                async (data: {
+                    sessionId: string;
+                    featureId: string;
+                    participantId: string;
+                }) => {
+                    await this.handleUnsubmitVote(socket, data);
+                }
+            );
+
             // Start feature event (host only)
             socket.on(
                 "start-feature",
@@ -66,6 +78,14 @@ export class SocketHandler {
                 "reveal-results",
                 async (data: { sessionId: string; featureId: string; participantId: string }) => {
                     await this.handleRevealResults(socket, data);
+                }
+            );
+
+            // Close session event (host only)
+            socket.on(
+                "close-session",
+                async (data: { sessionId: string; participantId: string }) => {
+                    await this.handleCloseSession(socket, data);
                 }
             );
 
@@ -179,6 +199,44 @@ export class SocketHandler {
     }
 
     /**
+     * Handle vote unsubmission (removal)
+     */
+    private async handleUnsubmitVote(
+        socket: Socket,
+        data: { sessionId: string; featureId: string; participantId: string }
+    ) {
+        try {
+            const { sessionId, featureId, participantId } = data;
+
+            // Verify participant is in the session
+            const exists = await participantService.participantExistsInSession(
+                participantId,
+                sessionId
+            );
+            if (!exists) {
+                socket.emit("error", { message: "Unauthorized" });
+                return;
+            }
+
+            // Delete the vote
+            await featureService.deleteVote(featureId, participantId);
+
+            // Notify all participants that the vote was removed
+            this.io.to(sessionId).emit("vote-unsubmitted", {
+                featureId,
+                participantId,
+            });
+
+            console.log(
+                `[Socket] Vote removed by ${participantId} for feature ${featureId}`
+            );
+        } catch (error) {
+            console.error("[Socket] Error handling unsubmit-vote:", error);
+            socket.emit("error", { message: "Failed to remove vote" });
+        }
+    }
+
+    /**
      * Handle starting a new feature (host only)
      */
     private async handleStartFeature(
@@ -241,6 +299,43 @@ export class SocketHandler {
         } catch (error) {
             console.error("[Socket] Error handling reveal-results:", error);
             socket.emit("error", { message: "Failed to reveal results" });
+        }
+    }
+
+    /**
+     * Handle closing a session (host only)
+     */
+    private async handleCloseSession(
+        socket: Socket,
+        data: { sessionId: string; participantId: string }
+    ) {
+        try {
+            const { sessionId, participantId } = data;
+
+            // Verify participant is the host
+            const isHost = await sessionService.isHost(sessionId, participantId);
+            if (!isHost) {
+                socket.emit("error", { message: "Only the host can close the session" });
+                return;
+            }
+
+            console.log(`[Socket] Closing session ${sessionId} by host ${participantId}`);
+
+            // Notify all participants that the session is closing
+            this.io.to(sessionId).emit("session-closed", {
+                sessionId,
+            });
+
+            // Small delay to ensure the event is delivered before deleting
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            // Delete the session from the database
+            await sessionService.deleteSession(sessionId);
+
+            console.log(`[Socket] Session ${sessionId} deleted from database`);
+        } catch (error) {
+            console.error("[Socket] Error handling close-session:", error);
+            socket.emit("error", { message: "Failed to close session" });
         }
     }
 

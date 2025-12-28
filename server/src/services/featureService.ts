@@ -133,6 +133,28 @@ export class FeatureService {
     }
 
     /**
+     * Delete a vote
+     */
+    async deleteVote(featureId: string, participantId: string) {
+        try {
+            const vote = await prisma.vote.deleteMany({
+                where: {
+                    featureId,
+                    participantId,
+                },
+            });
+
+            console.log(
+                `[FeatureService] Vote removed: ${participantId} unvoted on feature ${featureId}`
+            );
+            return vote;
+        } catch (error) {
+            console.error("[FeatureService] Error deleting vote:", error);
+            throw error;
+        }
+    }
+
+    /**
      * Get all votes for a feature
      */
     async getVotes(featureId: string) {

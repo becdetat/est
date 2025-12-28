@@ -22,8 +22,7 @@ interface ParticipantListProps {
  */
 export function ParticipantList({
     participants,
-    currentParticipantId,
-    votes = {},
+    currentParticipantId
 }: ParticipantListProps) {
     return (
         <Paper sx={{ p: 2 }}>
@@ -32,7 +31,6 @@ export function ParticipantList({
             </Typography>
             <List>
                 {participants.map((participant) => {
-                    const hasVoted = !!votes[participant.id];
                     const isCurrentUser = participant.id === currentParticipantId;
 
                     return (
@@ -57,14 +55,6 @@ export function ParticipantList({
                                 }
                                 secondary={participant.email}
                             />
-                            {hasVoted && (
-                                <Chip
-                                    label="Voted"
-                                    size="small"
-                                    color="success"
-                                    variant="outlined"
-                                />
-                            )}
                         </ListItem>
                     );
                 })}

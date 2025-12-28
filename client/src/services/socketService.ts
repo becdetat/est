@@ -79,6 +79,23 @@ class SocketService {
     }
 
     /**
+     * Remove a vote (deselect)
+     */
+    unsubmitVote(
+        sessionId: string,
+        featureId: string,
+        participantId: string
+    ): void {
+        if (this.socket) {
+            this.socket.emit("unsubmit-vote", {
+                sessionId,
+                featureId,
+                participantId,
+            });
+        }
+    }
+
+    /**
      * Start a new feature (host only)
      */
     startFeature(
@@ -105,6 +122,18 @@ class SocketService {
             this.socket.emit("reveal-results", {
                 sessionId,
                 featureId,
+                participantId,
+            });
+        }
+    }
+
+    /**
+     * Close a session (host only)
+     */
+    closeSession(sessionId: string, participantId: string): void {
+        if (this.socket) {
+            this.socket.emit("close-session", {
+                sessionId,
                 participantId,
             });
         }

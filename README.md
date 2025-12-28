@@ -266,6 +266,15 @@ Contributions are welcome! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for:
 
 Est is built with significant assistance from AI. We welcome AI generated pull requests, however we ask that you review the PR first for code quality and maintainability.
 
+### Copilot/AI Instructions
+When implementing features or fixes:
+1. Write the implementation
+2. Write comprehensive unit tests
+3. Build the applications and verify no build errors or warnings
+4. Run the tests to verify they pass
+5. Report test results
+6. Iterate if there are any issues
+
 ## License
 
 See [LICENSE](LICENSE) file for details.

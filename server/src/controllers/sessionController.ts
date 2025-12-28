@@ -12,7 +12,7 @@ export class SessionController {
      * POST /api/sessions
      * Create a new estimation session
      */
-    async createSession(req: Request, res: Response): Promise<any> {
+    async createSession(req: Request, res: Response) {
         try {
             const { hostName, hostEmail, estimationType } = req.body;
 
@@ -32,13 +32,13 @@ export class SessionController {
 
             const result = await sessionService.createSession(hostName, hostEmail, estimationType);
 
-            res.status(201).json({
+            return res.status(201).json({
                 sessionId: result.sessionId,
                 hostParticipantId: result.hostParticipantId,
             });
         } catch (error) {
             console.error("[SessionController] Error creating session:", error);
-            res.status(500).json({ error: "Failed to create session" });
+            return res.status(500).json({ error: "Failed to create session" });
         }
     }
 
@@ -46,7 +46,7 @@ export class SessionController {
      * GET /api/sessions/:sessionId
      * Get session details including participants and features
      */
-    async getSession(req: Request, res: Response): Promise<any> {
+    async getSession(req: Request, res: Response) {
         try {
             const { sessionId } = req.params;
 
@@ -62,10 +62,10 @@ export class SessionController {
                 return res.status(404).json({ error: "Session not found" });
             }
 
-            res.json(result);
+            return res.json(result);
         } catch (error) {
             console.error("[SessionController] Error fetching session:", error);
-            res.status(500).json({ error: "Failed to fetch session" });
+            return res.status(500).json({ error: "Failed to fetch session" });
         }
     }
 
@@ -73,7 +73,7 @@ export class SessionController {
      * POST /api/sessions/:sessionId/participants
      * Add a participant to a session
      */
-    async joinSession(req: Request, res: Response): Promise<any> {
+    async joinSession(req: Request, res: Response) {
         try {
             const { sessionId } = req.params;
             const { participantId, name, email } = req.body;
@@ -98,10 +98,10 @@ export class SessionController {
                 email
             );
 
-            res.status(201).json(participant);
+            return res.status(201).json(participant);
         } catch (error) {
             console.error("[SessionController] Error joining session:", error);
-            res.status(500).json({ error: "Failed to join session" });
+            return res.status(500).json({ error: "Failed to join session" });
         }
     }
 
@@ -109,7 +109,7 @@ export class SessionController {
      * GET /api/sessions/:sessionId/features
      * Get all features with votes for a session
      */
-    async getFeatures(req: Request, res: Response): Promise<any> {
+    async getFeatures(req: Request, res: Response) {
         try {
             const { sessionId } = req.params;
 
@@ -120,10 +120,10 @@ export class SessionController {
             }
 
             const features = await featureService.getFeatures(sessionId);
-            res.json(features);
+            return res.json(features);
         } catch (error) {
             console.error("[SessionController] Error fetching features:", error);
-            res.status(500).json({ error: "Failed to fetch features" });
+            return res.status(500).json({ error: "Failed to fetch features" });
         }
     }
 
@@ -131,7 +131,7 @@ export class SessionController {
      * POST /api/sessions/:sessionId/features
      * Create a new feature for estimation (host only)
      */
-    async createFeature(req: Request, res: Response): Promise<any> {
+    async createFeature(req: Request, res: Response) {
         try {
             const { sessionId } = req.params;
             const { participantId, name, link } = req.body;
@@ -154,10 +154,10 @@ export class SessionController {
             }
 
             const feature = await featureService.createFeature(sessionId, name, link);
-            res.status(201).json(feature);
+            return res.status(201).json(feature);
         } catch (error) {
             console.error("[SessionController] Error creating feature:", error);
-            res.status(500).json({ error: "Failed to create feature" });
+            return res.status(500).json({ error: "Failed to create feature" });
         }
     }
 
@@ -165,7 +165,7 @@ export class SessionController {
      * POST /api/sessions/:sessionId/features/:featureId/reveal
      * Reveal results for a feature (host only)
      */
-    async revealResults(req: Request, res: Response): Promise<any> {
+    async revealResults(req: Request, res: Response) {
         try {
             const { sessionId, featureId } = req.params;
             const { participantId } = req.body;
@@ -190,13 +190,13 @@ export class SessionController {
             const feature = await featureService.revealResults(featureId);
             const hasConsensus = await featureService.checkConsensus(featureId);
 
-            res.json({
+            return res.json({
                 feature,
                 hasConsensus,
             });
         } catch (error) {
             console.error("[SessionController] Error revealing results:", error);
-            res.status(500).json({ error: "Failed to reveal results" });
+            return res.status(500).json({ error: "Failed to reveal results" });
         }
     }
 }
